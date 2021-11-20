@@ -1,0 +1,17 @@
+Arithmetic {
+  Exp = Statement
+  Statement = StatementInsertInto TableName (IdentifierList)? KeywordValues LiteralValuesListList ";"?
+  LiteralValue = LiteralString | LiteralNumber
+  LiteralString = "'" (digit | letter)* "'"
+  LiteralNumber = digit+
+  LiteralValuesList = "(" ListOf<LiteralValue, ","> ")"
+  LiteralValuesListList = ListOf<LiteralValuesList, ",">
+  TableName = Identifier ("." Identifier)?
+  Identifier = IdentifierUnquoted | IdentifierQuotedTild | IdentifierQuotedDoubleQuotes
+  IdentifierUnquoted = #(letter alnum* ("." alnum*)?)
+  IdentifierQuotedTild = "`" (alnum | "``" | "\"")* "`"
+  IdentifierQuotedDoubleQuotes = "\"" (alnum | "`" | "\"\"")* "\""
+  IdentifierList = "(" ListOf<IdentifierUnquoted, ","> ")"
+  StatementInsertInto = caseInsensitive<"INSERT INTO">
+  KeywordValues = caseInsensitive<"VALUES">
+}
