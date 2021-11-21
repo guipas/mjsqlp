@@ -2,7 +2,7 @@ import ohm from 'ohm-js';
 import fs from 'fs';
 import path from 'path';
 
-const grammar = fs.readFileSync('./src/grammar.ohm', 'utf-8');
+const grammarDefinition = fs.readFileSync('./src/grammar.ohm', 'utf-8');
 
 const tests = [
   `INSERT INTO test (col, cola, colb ) values ('a', 2, 4, 'c')`,
@@ -21,11 +21,11 @@ const tests = [
   // VALUES (value1, value2, value3);`,
 ];
 
-const t = ohm.grammar(grammar);
+export const grammar = ohm.grammar(grammarDefinition);
 
 console.log('-----------------------');
 for (const test of tests) {
   console.log('---');
   console.log(test);
-  console.log(`--->`, t.match(test).succeeded());
+  console.log(`--->`, grammar.match(test).succeeded());
 }
