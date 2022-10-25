@@ -1,6 +1,5 @@
 Arithmetic {
-  Exp = Statement
-  Statement = StatementInsertInto TableName (IdentifierList)? KeywordValues LiteralValuesListList ";"?
+  Statement = StatementInsertInto
   LiteralValue = LiteralString | LiteralNumber
   LiteralString = "'" (digit | letter)* "'"
   LiteralNumber = digit+
@@ -8,10 +7,13 @@ Arithmetic {
   LiteralValuesListList = ListOf<LiteralValuesList, ",">
   TableName = Identifier ("." Identifier)?
   Identifier = IdentifierUnquoted | IdentifierQuotedTild | IdentifierQuotedDoubleQuotes
-  IdentifierUnquoted = #(letter alnum* ("." alnum*)?)
-  IdentifierQuotedTild = "`" (alnum | "``" | "\"")* "`"
-  IdentifierQuotedDoubleQuotes = "\"" (alnum | "`" | "\"\"")* "\""
+  IdentifierUnquoted = #(identifierUnquotedAllowedChars+ ("." identifierUnquotedAllowedChars*)?)
+  identifierUnquotedAllowedChars = alnum | "_" | "$"
+  // IdentifierQuotedTild = "`" (alnum | "``" | "\"")* "`"
+  IdentifierQuotedTild = "`" ((~"`" any) | "``")* "`"
+  // IdentifierQuotedDoubleQuotes = "\"" (alnum | "`" | "\"\"")* "\""
+  IdentifierQuotedDoubleQuotes = "\"" ((~"\"" any) | "\"\"")* "\""
   IdentifierList = "(" ListOf<IdentifierUnquoted, ","> ")"
-  StatementInsertInto = caseInsensitive<"INSERT INTO">
+  StatementInsertInto = caseInsensitive<"INSERT INTO"> TableName (IdentifierList)? KeywordValues LiteralValuesListList ";"?
   KeywordValues = caseInsensitive<"VALUES">
 }

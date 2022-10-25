@@ -6,7 +6,7 @@
     "test:build-src": "esbuild src/index.ts --platform=node --bundle --outdir=dist",
     "test:mocha": "mocha test",
     "build": "tsc --noEmit",
-    "dev": "chokidar \"./src/**\" -c \"npm start\"",
+    "dev": "chokidar \"./src/**\" -c \"npm test\"",
     "start": "node src/index.mjs"
   },
   "dependencies": {
