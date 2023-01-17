@@ -16,16 +16,12 @@ semantic.addOperation('toTree', {
   StatementInsertInto: function(insertInto, tableName, columns, keyworkValues, literalValueListList, coma) {
     // console.log('columns', columns.children);
     return {
-      name: 'operation:insert',
-      value: {
-        tableName: tableName.sourceString,
-        columns: columns?.children[0]?.toTree() || null,
-        // keyworkValues: keyworkValues,
-        rows: literalValueListList.toTree(),
-        coma: coma.sourceString === ";",
-
-      }
-
+      type: 'statement',
+      name: 'insertInto',
+      columns: columns?.children[0]?.toTree() || null,
+      tableName: tableName.sourceString,
+      values: literalValueListList.toTree(),
+      coma: coma.sourceString === ";",
     };
   },
   identifier(identifier) {
@@ -36,34 +32,41 @@ semantic.addOperation('toTree', {
   },
   identifierUnquoted(body) {
     return {
-      name: 'identifier',
+      type: 'identifier',
+      name: 'unquotedIdentifier',
       value: body.sourceString
     };
   },
 
 
-  NonemptyListOf: function(x, _, xs) {
-    return [x.toTree()].concat(xs.toTree());  // .myOp can be called on the array-like xs
-  },
 
-  LiteralValuesList(startParen, list, endParent) {
+
+  ValueList(startParen, list, endParent) {
     // console.log('LiteralValuesList', list);
-    return list.toTree();
+    return {
+      type: 'ValueList',
+      values: list.toTree()
+    };
   },
   LiteralString(startQuote, str, endQuote) {
     return {
-      name: 'value:string',
+      type: 'Literal',
+      name: 'string',
       value: str.sourceString,
     };
   },
   LiteralNumber(nb) {
     return {
-      name: 'value:number',
+      type: 'Literal',
+      name: 'number',
       value: nb.sourceString,
     };
   },
 
 
+  NonemptyListOf: function(x, _, xs) {
+    return [x.toTree()].concat(xs.toTree());
+  },
   _iter(...children) {
     return children.map(c => c.toTree());
   },

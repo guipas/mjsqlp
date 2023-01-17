@@ -1,11 +1,12 @@
 SQL {
   Statement = StatementInsertInto
 
-  LiteralValue = (LiteralString | LiteralNumber)
+  ValueList = "(" ListOf<Value, ","> ")"
+  Value = (LiteralString | LiteralNumber)
   LiteralString = "'" alnum* "'"
   LiteralNumber = digit+
-  LiteralValuesList = "(" ListOf<LiteralValue, ","> ")"
-  LiteralValuesListList = ListOf<LiteralValuesList, ",">
+
+  LiteralValuesListList = ListOf<ValueList, ",">
   tableName = identifier ("." identifier)?
 
   identifier = identifierUnquoted | identifierQuotedTild | identifierQuotedDoubleQuotes
