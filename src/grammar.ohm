@@ -1,19 +1,20 @@
-Arithmetic {
+SQL {
   Statement = StatementInsertInto
-  LiteralValue = LiteralString | LiteralNumber
-  LiteralString = "'" (digit | letter)* "'"
+
+  LiteralValue = (LiteralString | LiteralNumber)
+  LiteralString = "'" alnum* "'"
   LiteralNumber = digit+
   LiteralValuesList = "(" ListOf<LiteralValue, ","> ")"
   LiteralValuesListList = ListOf<LiteralValuesList, ",">
-  TableName = Identifier ("." Identifier)?
-  Identifier = IdentifierUnquoted | IdentifierQuotedTild | IdentifierQuotedDoubleQuotes
-  IdentifierUnquoted = #(identifierUnquotedAllowedChars+ ("." identifierUnquotedAllowedChars*)?)
+  tableName = identifier ("." identifier)?
+
+  identifier = identifierUnquoted | identifierQuotedTild | identifierQuotedDoubleQuotes
+  identifierUnquoted = identifierUnquotedAllowedChars+
   identifierUnquotedAllowedChars = alnum | "_" | "$"
-  // IdentifierQuotedTild = "`" (alnum | "``" | "\"")* "`"
-  IdentifierQuotedTild = "`" ((~"`" any) | "``")* "`"
-  // IdentifierQuotedDoubleQuotes = "\"" (alnum | "`" | "\"\"")* "\""
-  IdentifierQuotedDoubleQuotes = "\"" ((~"\"" any) | "\"\"")* "\""
-  IdentifierList = "(" ListOf<IdentifierUnquoted, ","> ")"
-  StatementInsertInto = caseInsensitive<"INSERT INTO"> TableName (IdentifierList)? KeywordValues LiteralValuesListList ";"?
+  identifierQuotedTild = "`" space* ((~"`" any) | "``")* space* "`"
+  identifierQuotedDoubleQuotes = "\"" space* ((~"\"" any) | "\"\"")* space* "\""
+
+  ColumnsList = "(" ListOf<identifierUnquoted, ","> ")"
+  StatementInsertInto = caseInsensitive<"INSERT INTO"> tableName ColumnsList? KeywordValues LiteralValuesListList ";"?
   KeywordValues = caseInsensitive<"VALUES">
 }
