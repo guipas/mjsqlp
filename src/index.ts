@@ -19,10 +19,15 @@ semantic.addOperation('toTree', {
       type: 'statement',
       name: 'insertInto',
       columns: columns?.children[0]?.toTree() || null,
-      tableName: tableName.sourceString,
+      tableName: tableName.toTree(),
       values: literalValueListList.toTree(),
       coma: coma.sourceString === ";",
     };
+  },
+  tableName(dbNameOrTableName, dot, tableName) {
+    // console.log(dbNameOrTableName.sourceString, dot.sourceString, tableName.sourceString);
+    return [dbNameOrTableName.toTree(), tableName.toTree()?.[0]].filter(n => n);
+  
   },
   identifier(identifier) {
     return identifier.toTree();
@@ -36,6 +41,14 @@ semantic.addOperation('toTree', {
       name: 'unquotedIdentifier',
       value: body.sourceString
     };
+  },
+  identifierQuotedTild(startTild, spaces1, body, spaces2, endTild) {
+    return {
+      type: 'identifier',
+      name: 'quotedIdentifier',
+      value: spaces1.sourceString + body.sourceString + spaces2.sourceString,
+    };
+  
   },
 
 
