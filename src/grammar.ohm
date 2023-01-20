@@ -1,21 +1,126 @@
 SQL {
-  Statement = StatementInsertInto
+  Statement = CommandInsertInto | CommandUpdate
 
   ValueList = "(" ListOf<Value, ","> ")"
   Value = (LiteralString | LiteralNumber)
-  LiteralString = "'" alnum* "'"
+  LiteralString = "'" ((~"'" any) | "''")* "'"
   LiteralNumber = digit+
 
-  LiteralValuesListList = ListOf<ValueList, ",">
-  tableName = identifier ("." identifier)?
+  ValuesListList = ListOf<ValueList, ",">
 
-  identifier = identifierUnquoted | identifierQuotedTild | identifierQuotedDoubleQuotes
+  TableReferenceList = ListOf<TableReference, ",">
+  TableReference = identifier
+  ColumnReference = identifier
+  ColumnsList = "(" ListOf<identifierUnquoted, ","> ")"
+  Assignement = ColumnReference "=" (Expression | "DEFAULT")
+  AssignementList = ListOf<Assignement, ",">
+
+  identifier = identifierPart ("." identifierPart)?
+  identifierPart = identifierUnquoted | identifierQuotedTild | identifierQuotedDoubleQuotes
   identifierUnquoted = identifierUnquotedAllowedChars+
   identifierUnquotedAllowedChars = alnum | "_" | "$"
   identifierQuotedTild = "`" space* ((~"`" any) | "``")* space* "`"
   identifierQuotedDoubleQuotes = "\"" space* ((~"\"" any) | "\"\"")* space* "\""
 
-  ColumnsList = "(" ListOf<identifierUnquoted, ","> ")"
-  StatementInsertInto = caseInsensitive<"INSERT INTO"> tableName ColumnsList? KeywordValues LiteralValuesListList ";"?
+  ComparisonOperator = "=" | ">=" | ">" | "<=" | "<" | "<>" | "!="
+  IsOperator = "IS" ("NOT")?
+
+  Expression =
+      LogicExpression
+    | NegativeExpression
+    | BooleanPrimary
+    //| boolean_primary "IS" ("NOT")? (TRUE | FALSE | UNKNOWN)
+
+  LogicExpression =
+      Expression "OR" Expression
+    | Expression "||" Expression
+    | Expression "XOR" Expression
+    | Expression "AND" Expression
+    | Expression "&&" Expression
+
+  NegativeExpression = 
+      "NOT" Expression
+    | "!" Expression
+
+  BooleanPrimary =
+      BooleanPrimaryComparison
+    | Predicate
+
+  BooleanPrimaryComparison = 
+      BooleanPrimary IsOperator "NULL"
+    | BooleanPrimary "<=>" Predicate
+    | BooleanPrimary ComparisonOperator Predicate
+    // | BooleanPrimary ComparisonOperator ("ALL" | "ANY)" (subquery) // not implmented for now
+
+  Predicate =
+      PredicateComparison
+    | BitExpression
+
+  PredicateComparison =
+  //  bit_expr ("NOT")? "IN" (subquery)
+      BitExpression ("NOT")? "IN" ValueList
+  //| BitExpression ("NOT")? "BETWEEN" BitExpression "AND" Predicate
+    | BitExpression "SOUNDS" "LIKE" BitExpression
+  //| BitExpression ("NOT")? "LIKE" SimpleExpression ("ESCAPE" SimpleExpression)?
+    | BitExpression ("NOT")? "LIKE" SimpleExpression
+    | BitExpression ("NOT")? "REGEXP" BitExpression
+
+  BitExpression =
+      BitOperation
+    | SimpleExpression
+
+  BitOperation = 
+      BitExpression "|" BitExpression
+    | BitExpression "&" BitExpression
+    | BitExpression "<<" BitExpression
+    | BitExpression ">>" BitExpression
+    | BitExpression "+" BitExpression
+    | BitExpression "-" BitExpression
+    | BitExpression "*" BitExpression
+    | BitExpression "/" BitExpression
+    | BitExpression "DIV" BitExpression
+    | BitExpression "MOD" BitExpression
+    | BitExpression "%" BitExpression
+    | BitExpression "^" BitExpression
+    //| BitExpression "+" interval_expr
+    //| BitExpression "-" interval_expr
+    
+
+  SimpleExpression =
+    Value
+    | identifier
+    //| function_call
+    //| SimpleExpression COLLATE collation_name
+    //| param_marker
+    //| variable
+    //| SimpleExpression "||" SimpleExpression
+    | SimpleExpressionWithModifier
+    
+    //| (expr [, expr] ...)
+    //| ROW (expr, expr [, expr] ...)
+    //| (subquery)
+    //| EXISTS (subquery)
+    //| {identifier expr}
+    //| match_expr
+    //| case_expr
+    //| interval_expr
+
+  SimpleExpressionWithModifier =
+      "+" SimpleExpression
+    | "-" SimpleExpression
+    | "~" SimpleExpression
+    | "!" SimpleExpression
+    | "BINARY" SimpleExpression
+
+  
+  CommandInsertInto = KeywordInsertInto TableReference ColumnsList? KeywordValues ValuesListList ";"?
+  CommandUpdate = KeywordUpdate TableReferenceList KeywordSet AssignementList ClauseWhere? ";"?
+
+  ClauseWhere = KeywordWhere Expression
+
+  KeywordInsertInto = caseInsensitive<"INSERT INTO">
   KeywordValues = caseInsensitive<"VALUES">
+  KeywordUpdate = caseInsensitive<"UPDATE">
+  KeywordSet = caseInsensitive<"SET">
+  KeywordWhere = caseInsensitive<"WHERE">
 }

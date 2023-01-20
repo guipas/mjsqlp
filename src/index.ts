@@ -10,30 +10,29 @@ export const semantic = grammar.createSemantics();
 semantic.addOperation('toTree', {
 
   Statement: function(node) {
-    // console.log(node);
     return node.toTree();
   },
-  StatementInsertInto: function(insertInto, tableName, columns, keyworkValues, literalValueListList, coma) {
-    // console.log('columns', columns.children);
+  CommandInsertInto: function(insertInto, tableName, columns, keyworkValues, literalValueListList, coma) {
     return {
       type: 'statement',
       name: 'insertInto',
       columns: columns?.children[0]?.toTree() || null,
       tableName: tableName.toTree(),
       values: literalValueListList.toTree(),
-      coma: coma.sourceString === ";",
+      endComa: coma.sourceString === ";",
     };
   },
-  tableName(dbNameOrTableName, dot, tableName) {
-    // console.log(dbNameOrTableName.sourceString, dot.sourceString, tableName.sourceString);
+
+  identifier(dbNameOrTableName, dot, tableName) {
     return [dbNameOrTableName.toTree(), tableName.toTree()?.[0]].filter(n => n);
-  
-  },
-  identifier(identifier) {
-    return identifier.toTree();
   },
   ColumnsList(startParen, list, endParen) {
     return list.toTree();
+  },
+
+  
+  identifierPart(identifier) {
+    return identifier.toTree();
   },
   identifierUnquoted(body) {
     return {
@@ -55,7 +54,6 @@ semantic.addOperation('toTree', {
 
 
   ValueList(startParen, list, endParent) {
-    // console.log('LiteralValuesList', list);
     return {
       type: 'ValueList',
       values: list.toTree()
