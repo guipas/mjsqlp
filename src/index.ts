@@ -34,11 +34,11 @@ semantic.addOperation('toTree', {
   identifierPart(identifier) {
     return identifier.toTree();
   },
-  identifierUnquoted(body) {
+  identifierUnquoted(firstChar, body) {
     return {
       type: 'identifier',
       name: 'unquotedIdentifier',
-      value: body.sourceString
+      value: firstChar.sourceString + body.sourceString
     };
   },
   identifierQuotedTild(startTild, spaces1, body, spaces2, endTild) {

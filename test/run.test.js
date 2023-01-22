@@ -5,8 +5,9 @@ const { expect } = chai;
 
 const insertTests = require('./inserts-matches.js');
 const updateTests = require('./update-matches.js');
+const selectTests = require('./select-matches.js');
 
-const testSuites = [].concat(insertTests, updateTests);
+const testSuites = [].concat(insertTests, updateTests, selectTests);
 
 for (const suite of testSuites) {
   describe(suite.title, async function() {

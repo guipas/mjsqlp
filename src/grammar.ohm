@@ -1,5 +1,10 @@
 SQL {
-  Statement = CommandInsertInto | CommandUpdate
+  Statement = CommandInsertInto | CommandUpdate | CommandSelect
+
+  SelectList = ListOf<SelectListElement, ",">
+  SelectListElement = selectIdentifier | Expression 
+  selectIdentifier = selectIdentifierPart ("." selectIdentifierPart)?
+  selectIdentifierPart = identifierUnquoted | identifierQuotedTild | identifierQuotedDoubleQuotes | "*"
 
   ValueList = "(" ListOf<Value, ","> ")"
   Value = (LiteralString | LiteralNumber)
@@ -17,7 +22,7 @@ SQL {
 
   identifier = identifierPart ("." identifierPart)?
   identifierPart = identifierUnquoted | identifierQuotedTild | identifierQuotedDoubleQuotes
-  identifierUnquoted = identifierUnquotedAllowedChars+
+  identifierUnquoted = letter identifierUnquotedAllowedChars*
   identifierUnquotedAllowedChars = alnum | "_" | "$"
   identifierQuotedTild = "`" space* ((~"`" any) | "``")* space* "`"
   identifierQuotedDoubleQuotes = "\"" space* ((~"\"" any) | "\"\"")* space* "\""
@@ -115,6 +120,7 @@ SQL {
   
   CommandInsertInto = KeywordInsertInto TableReference ColumnsList? KeywordValues ValuesListList ";"?
   CommandUpdate = KeywordUpdate TableReferenceList KeywordSet AssignementList ClauseWhere? ";"?
+  CommandSelect = KeywordSelect SelectList (KeywordFrom TableReference ClauseWhere?)? ";"?
 
   ClauseWhere = KeywordWhere Expression
 
@@ -123,4 +129,6 @@ SQL {
   KeywordUpdate = caseInsensitive<"UPDATE">
   KeywordSet = caseInsensitive<"SET">
   KeywordWhere = caseInsensitive<"WHERE">
+  KeywordSelect = caseInsensitive<"SELECT">
+  KeywordFrom = caseInsensitive<"FROM">
 }
